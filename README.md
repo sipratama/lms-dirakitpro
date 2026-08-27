@@ -4,7 +4,7 @@
 
 ## Status repo
 
-Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` dan tiga API route handler sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. **Belum ada** koneksi database (Drizzle/PostgreSQL), auth (Clerk), maupun payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
+Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` dan tiga API route handler sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. Tooling dasar (Prettier, husky + lint-staged) dan infra database lokal (docker-compose Postgres + Dockerfile `apps/web`) sudah ada. **Belum ada** wiring Drizzle ORM ke kode, auth (Clerk), maupun payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
 
 ## Tentang DirakitPro
 
@@ -73,7 +73,10 @@ Sesuai §14 PRD ("Technical Architecture & Stack") — arsitektur *Next.js full-
 │           ├── (public)/     # Shell publik: home, courses, login/register, checkout, payment
 │           ├── (learner)/    # Shell learner: dashboard, learn/[courseSlug]/[lessonSlug], account
 │           ├── (admin)/      # Shell admin: courses, users, orders, projects, feedback
-│           └── api/          # Route handler: webhooks Clerk/Midtrans, media upload (masih stub 501)
+│           ├── api/          # Route handler: webhooks Clerk/Midtrans, media upload (masih stub 501)
+│           └── Dockerfile    # Standalone production build image (bukan untuk dev sehari-hari)
+├── docker-compose.yml         # Postgres lokal untuk dev (`docker compose up -d db`)
+├── .env.example               # Template env — copy jadi .env, jangan pernah commit .env
 ├── pnpm-workspace.yaml, turbo.json, package.json  # Konfigurasi monorepo pnpm + Turborepo
 ├── .agents/skills/design-taste-frontend/  # Skill agent terkait taste/desain frontend
 ├── .claude/, .codex/       # Konfigurasi harness AI coding agent (Claude Code, Codex)
@@ -87,17 +90,24 @@ Sesuai §14 PRD ("Technical Architecture & Stack") — arsitektur *Next.js full-
 
 ## Instalasi & menjalankan project
 
-Prasyarat: Node.js 22+ dan pnpm (`corepack enable` lalu pnpm mengikuti versi di `package.json`).
+Prasyarat: Node.js 22+, pnpm (`corepack enable` lalu pnpm mengikuti versi di `package.json`), dan Docker (untuk database lokal).
 
 ```bash
-pnpm install        # install semua dependency workspace (root + apps/web)
+cp .env.example .env   # isi kredensial lokal (default di .env.example sudah cukup untuk dev)
+pnpm install            # install semua dependency workspace (root + apps/web)
+docker compose up -d db # jalankan Postgres lokal (baca env dari .env otomatis)
+
 pnpm dev            # jalankan Next.js dev server (apps/web) via Turborepo
 pnpm build          # production build
 pnpm lint           # ESLint
 pnpm typecheck      # tsc --noEmit (TypeScript strict)
+pnpm format         # Prettier --write
+pnpm format:check   # Prettier --check
 ```
 
-Belum ada environment variable yang wajib diisi karena integrasi Clerk/Midtrans/database/dst belum disambungkan ke kode (masih tahap route placeholder). `.env.example` akan ditambahkan begitu integrasi tersebut mulai dikerjakan.
+`apps/web` belum benar-benar membaca `DATABASE_URL` (belum ada Drizzle ORM, menyusul di langkah 8) — `docker compose up -d db` saat ini murni menyiapkan Postgres-nya saja. `apps/web/Dockerfile` adalah build produksi standalone untuk deploy/staging nanti, bukan dipakai untuk dev sehari-hari.
+
+Git hook (husky) sudah aktif otomatis setelah `pnpm install` (lewat script `prepare`): `pre-commit` menjalankan Prettier/ESLint hanya pada file yang di-stage, `pre-push` menjalankan `typecheck` + `lint` penuh.
 
 ## Catatan lain
 
