@@ -4,7 +4,7 @@
 
 ## Status repo
 
-Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` dan tiga API route handler sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. Tooling dasar (Prettier, husky + lint-staged) dan infra database lokal (docker-compose Postgres + Dockerfile `apps/web`) sudah ada. **Belum ada** wiring Drizzle ORM ke kode, auth (Clerk), maupun payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
+Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` dan tiga API route handler sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. Tooling dasar (Prettier, husky + lint-staged) dan database sudah siap: skema Drizzle ORM lengkap (22 tabel sesuai `docs/DATA-MODEL.md` §3, termasuk trigger `updated_at` dan CHECK constraint) sudah di-generate dan di-migrate ke Postgres lokal (docker-compose). **Belum ada** kode yang benar-benar query database dari halaman/route (belum ada fitur nyata terhubung), auth (Clerk), maupun payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
 
 ## Tentang DirakitPro
 
@@ -69,12 +69,17 @@ Sesuai §14 PRD ("Technical Architecture & Stack") — arsitektur *Next.js full-
 │   └── TASTE-SKILL.md        # Ringkasan ruleset "Taste Skill" untuk menghindari output desain generik AI
 ├── apps/
 │   └── web/                  # Aplikasi Next.js 16 (App Router, TS strict, Tailwind, shadcn/ui)
-│       └── app/
-│           ├── (public)/     # Shell publik: home, courses, login/register, checkout, payment
-│           ├── (learner)/    # Shell learner: dashboard, learn/[courseSlug]/[lessonSlug], account
-│           ├── (admin)/      # Shell admin: courses, users, orders, projects, feedback
-│           ├── api/          # Route handler: webhooks Clerk/Midtrans, media upload (masih stub 501)
-│           └── Dockerfile    # Standalone production build image (bukan untuk dev sehari-hari)
+│       ├── app/
+│       │   ├── (public)/     # Shell publik: home, courses, login/register, checkout, payment
+│       │   ├── (learner)/    # Shell learner: dashboard, learn/[courseSlug]/[lessonSlug], account
+│       │   ├── (admin)/      # Shell admin: courses, users, orders, projects, feedback
+│       │   └── api/          # Route handler: webhooks Clerk/Midtrans, media upload (masih stub 501)
+│       ├── db/
+│       │   ├── schema/       # Skema Drizzle per domain (identity, catalog, checkpoint, commerce, dst)
+│       │   └── client.ts     # Drizzle client (drizzle-orm/postgres-js), baca DATABASE_URL
+│       ├── drizzle/          # Migration SQL ter-generate + migration custom (trigger updated_at)
+│       ├── drizzle.config.ts # Config drizzle-kit (generate/migrate/studio)
+│       └── Dockerfile        # Standalone production build image (bukan untuk dev sehari-hari)
 ├── docker-compose.yml         # Postgres lokal untuk dev (`docker compose up -d db`)
 ├── .env.example               # Template env — copy jadi .env, jangan pernah commit .env
 ├── pnpm-workspace.yaml, turbo.json, package.json  # Konfigurasi monorepo pnpm + Turborepo
@@ -105,7 +110,13 @@ pnpm format         # Prettier --write
 pnpm format:check   # Prettier --check
 ```
 
-`apps/web` belum benar-benar membaca `DATABASE_URL` (belum ada Drizzle ORM, menyusul di langkah 8) — `docker compose up -d db` saat ini murni menyiapkan Postgres-nya saja. `apps/web/Dockerfile` adalah build produksi standalone untuk deploy/staging nanti, bukan dipakai untuk dev sehari-hari.
+```bash
+pnpm --filter web db:generate  # generate migration SQL baru dari perubahan db/schema/*.ts
+pnpm --filter web db:migrate   # jalankan migration ke Postgres (DATABASE_URL di .env)
+pnpm --filter web db:studio    # buka Drizzle Studio untuk lihat isi database
+```
+
+`apps/web/Dockerfile` adalah build produksi standalone untuk deploy/staging nanti, bukan dipakai untuk dev sehari-hari.
 
 Git hook (husky) sudah aktif otomatis setelah `pnpm install` (lewat script `prepare`): `pre-commit` menjalankan Prettier/ESLint hanya pada file yang di-stage, `pre-push` menjalankan `typecheck` + `lint` penuh.
 
