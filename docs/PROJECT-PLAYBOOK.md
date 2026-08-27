@@ -15,6 +15,16 @@
 - **Git connect di awal, bukan di akhir.** Idealnya `git init` + connect remote dilakukan sesegera folder project dibuat (langkah 0), sebelum PRD/data model/frontend design ditulis, supaya draft dokumen ikut punya riwayat commit. Di DirakitPro langkah git dilakukan belakangan (setelah dokumen selesai) dan itu berhasil, tapi historinya jadi satu commit besar "initialize project" alih-alih riwayat bertahap per dokumen. Untuk project berikutnya, rekomendasi: pindahkan "connect git" ke langkah 0.
 - **README dan playbook ini adalah living document.** Update setiap kali status project berubah signifikan (misal scaffold selesai, fitur P0 pertama selesai, dst), jangan ditulis sekali lalu dibiarkan basi.
 
+## Alur kerja branch per langkah
+
+Ditetapkan mulai langkah 6 (Scaffold project) dan berlaku untuk semua langkah setelahnya, supaya riwayat pengembangan tercatat rapi satu branch per unit kerja:
+
+1. **Mulai dari `main` yang bersih.** Setiap siklus kerja baru dimulai dengan `main` lokal yang sudah sinkron dengan remote (`git checkout main && git pull`) — bukan melanjutkan dari branch kerja sebelumnya.
+2. **Buat branch baru dulu, baru kerjakan task.** Branch dibuat dari `main` sebelum satu baris kode pun ditulis, dengan penamaan `feat/<nama-singkat-langkah>` (contoh: `feat/scaffold-project`). Satu branch = satu langkah/task di checklist, tidak digabung.
+3. **Commit dilakukan di branch tersebut, tanpa push.** Assistant boleh membuat commit lokal sebagai bagian dari menyelesaikan task, tapi **push dan pembuatan PR ke `main` selalu dilakukan oleh user**, bukan assistant.
+4. **Assistant wajib melaporkan status selesai/belum secara eksplisit**, dicek terhadap `docs/PROJECT-PLAYBOOK.md`: setelah satu langkah kelar dan lolos verifikasi (lint/typecheck/build/dst), assistant menyatakan langkah mana yang selesai dan langkah mana berikutnya yang bisa dikerjakan — bukan otomatis lanjut mengerjakan langkah berikutnya tanpa konfirmasi user.
+5. **Siklus berulang setelah PR di-merge.** Begitu user selesai PR dan merge ke `main`, siklus kembali ke langkah 1 (checkout `main`, pull, branch baru) untuk task berikutnya.
+
 ## Checklist langkah
 
 | # | Langkah | Deskripsi / rekomendasi | Output/artifact | Status di DirakitPro |
