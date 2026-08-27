@@ -4,3 +4,4 @@ node_modules
 pnpm-lock.yaml
 docs
 *.md
+apps/web/drizzle/meta
