@@ -4,7 +4,7 @@
 
 ## Status repo
 
-Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` dan tiga API route handler sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. Tooling dasar (Prettier, husky + lint-staged) dan database sudah siap: skema Drizzle ORM lengkap (22 tabel sesuai `docs/DATA-MODEL.md` §3, termasuk trigger `updated_at` dan CHECK constraint) sudah di-generate dan di-migrate ke Postgres lokal (docker-compose). **Belum ada** kode yang benar-benar query database dari halaman/route (belum ada fitur nyata terhubung), auth (Clerk), maupun payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
+Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. Tooling dasar (Prettier, husky + lint-staged), database (skema Drizzle 22 tabel + migration, lihat `docs/DATA-MODEL.md` §3), dan **auth (Clerk)** sudah terpasang: `proxy.ts` menggerbang `(learner)`/`(admin)` (autentikasi + role ADMIN), webhook `/api/webhooks/clerk` sinkronisasi `users`↔`auth_identities`. **Belum ada** kredensial Clerk asli terpasang (perlu `.env` diisi supaya app benar-benar bisa dijalankan), dan **belum ada** payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
 
 ## Tentang DirakitPro
 
@@ -79,6 +79,7 @@ Sesuai §14 PRD ("Technical Architecture & Stack") — arsitektur *Next.js full-
 │       │   └── client.ts     # Drizzle client (drizzle-orm/postgres-js), baca DATABASE_URL
 │       ├── drizzle/          # Migration SQL ter-generate + migration custom (trigger updated_at)
 │       ├── drizzle.config.ts # Config drizzle-kit (generate/migrate/studio)
+│       ├── proxy.ts          # Auth gate Clerk (pengganti middleware.ts di Next.js 16)
 │       └── Dockerfile        # Standalone production build image (bukan untuk dev sehari-hari)
 ├── docker-compose.yml         # Postgres lokal untuk dev (`docker compose up -d db`)
 ├── .env.example               # Template env — copy jadi .env, jangan pernah commit .env
@@ -119,6 +120,8 @@ pnpm --filter web db:studio    # buka Drizzle Studio untuk lihat isi database
 `apps/web/Dockerfile` adalah build produksi standalone untuk deploy/staging nanti, bukan dipakai untuk dev sehari-hari.
 
 Git hook (husky) sudah aktif otomatis setelah `pnpm install` (lewat script `prepare`): `pre-commit` menjalankan Prettier/ESLint hanya pada file yang di-stage, `pre-push` menjalankan `typecheck` + `lint` penuh.
+
+**Auth (Clerk):** `pnpm dev`/`pnpm build` tetap jalan tanpa Clerk key (build lolos), tapi **runtime akan crash** begitu ada request kalau `CLERK_SECRET_KEY`/`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` di `.env` kosong. Isi dengan key asli dari [Clerk Dashboard](https://dashboard.clerk.com) (atau `npx clerk@latest init`), lalu isi `CLERK_WEBHOOK_SIGNING_SECRET` dari Clerk Dashboard → Webhooks setelah endpoint `/api/webhooks/clerk` didaftarkan di sana.
 
 ## Catatan lain
 
