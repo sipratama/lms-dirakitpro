@@ -15,6 +15,16 @@
 - **Git connect di awal, bukan di akhir.** Idealnya `git init` + connect remote dilakukan sesegera folder project dibuat (langkah 0), sebelum PRD/data model/frontend design ditulis, supaya draft dokumen ikut punya riwayat commit. Di DirakitPro langkah git dilakukan belakangan (setelah dokumen selesai) dan itu berhasil, tapi historinya jadi satu commit besar "initialize project" alih-alih riwayat bertahap per dokumen. Untuk project berikutnya, rekomendasi: pindahkan "connect git" ke langkah 0.
 - **README dan playbook ini adalah living document.** Update setiap kali status project berubah signifikan (misal scaffold selesai, fitur P0 pertama selesai, dst), jangan ditulis sekali lalu dibiarkan basi.
 
+## Alur kerja branch per langkah
+
+Ditetapkan mulai langkah 6 (Scaffold project) dan berlaku untuk semua langkah setelahnya, supaya riwayat pengembangan tercatat rapi satu branch per unit kerja:
+
+1. **Mulai dari `main` yang bersih.** Setiap siklus kerja baru dimulai dengan `main` lokal yang sudah sinkron dengan remote (`git checkout main && git pull`) — bukan melanjutkan dari branch kerja sebelumnya.
+2. **Buat branch baru dulu, baru kerjakan task.** Branch dibuat dari `main` sebelum satu baris kode pun ditulis, dengan penamaan `feat/<nama-singkat-langkah>` (contoh: `feat/scaffold-project`). Satu branch = satu langkah/task di checklist, tidak digabung.
+3. **Commit dilakukan di branch tersebut, tanpa push.** Assistant boleh membuat commit lokal sebagai bagian dari menyelesaikan task, tapi **push dan pembuatan PR ke `main` selalu dilakukan oleh user**, bukan assistant.
+4. **Assistant wajib melaporkan status selesai/belum secara eksplisit**, dicek terhadap `docs/PROJECT-PLAYBOOK.md`: setelah satu langkah kelar dan lolos verifikasi (lint/typecheck/build/dst), assistant menyatakan langkah mana yang selesai dan langkah mana berikutnya yang bisa dikerjakan — bukan otomatis lanjut mengerjakan langkah berikutnya tanpa konfirmasi user.
+5. **Siklus berulang setelah PR di-merge.** Begitu user selesai PR dan merge ke `main`, siklus kembali ke langkah 1 (checkout `main`, pull, branch baru) untuk task berikutnya.
+
 ## Checklist langkah
 
 | # | Langkah | Deskripsi / rekomendasi | Output/artifact | Status di DirakitPro |
@@ -25,7 +35,7 @@
 | 3 | Bikin Data Model | Turunkan skema database dari PRD: daftar entity & ERD, strategi ID, konvensi naming/timestamp, kebijakan soft delete, dan tandai eksplisit bagian mana yang masih asumsi/keputusan terbuka. Belum perlu migration file nyata di tahap ini, cukup draft untuk direview. | `docs/DATA-MODEL.md` | Selesai (status draft untuk review, belum ada migration file) |
 | 4 | Bikin Frontend Design | Turunkan arah desain dari PRD + data model + skill desain (langkah 1): satu kalimat arah desain, kepribadian produk, daftar larangan visual ("anti-slop ban list"), prinsip UX, information architecture/route map, dan bahasa antarmuka. Dokumen ini jadi kontrak yang wajib dipatuhi saat implementasi UI nanti. | `docs/FRONTEND-DESIGN.md` | Selesai |
 | 5 | Bikin README | Tulis README yang mendeskripsikan project secara akurat berdasarkan kode/dokumen yang benar-benar ada (bukan aspirasi) — termasuk secara eksplisit menyatakan status repo kalau belum ada kode aplikasi. Update lagi begitu scaffold project mulai dibuat. | `README.md` | Selesai (perlu direvisi ulang begitu scaffold aplikasi mulai ada) |
-| 6 | Scaffold project | Inisialisasi aplikasi sesuai stack di PRD §14: pnpm + Turborepo, Next.js (App Router) + TypeScript strict, Tailwind CSS + shadcn/ui, struktur folder route group sesuai `docs/FRONTEND-DESIGN.md` §3. | `package.json`, `app/`, konfigurasi build | Pending |
+| 6 | Scaffold project | Inisialisasi aplikasi sesuai stack di PRD §14: pnpm + Turborepo, Next.js (App Router) + TypeScript strict, Tailwind CSS + shadcn/ui, struktur folder route group sesuai `docs/FRONTEND-DESIGN.md` §3. | `package.json`, `app/`, konfigurasi build | Selesai — dikerjakan di branch `feat/scaffold-project`. Monorepo `apps/web` (Next.js 16, TS strict, Tailwind, shadcn/ui) dibuat via `create-next-app` + `shadcn init`; seluruh 25 halaman + 3 route handler di `docs/FRONTEND-DESIGN.md` §3.1 dibuat sebagai placeholder (bukan UI final) dengan `layout.tsx` per shell (`(public)`/`(learner)`/`(admin)`); `pnpm build`, `pnpm lint`, `pnpm typecheck` semua lolos. Belum: shell nyata sesuai §7 PRD, database, auth, payment — menyusul di langkah 7 dst |
 | 7 | Setup tooling dasar | ESLint + Prettier, TypeScript strict config, `.env.example` untuk semua secret/variabel (Clerk, Midtrans, R2, Resend, PostHog, Sentry, database URL), husky/lint-staged kalau dipakai. | Config file di root | Pending |
 | 8 | Setup database | Init Drizzle ORM, generate migration awal dari `docs/DATA-MODEL.md`, jalankan migration ke PostgreSQL (lokal/dev), setup trigger `updated_at` sesuai keputusan di data model. | Folder `drizzle/`, koneksi DB dev jalan | Pending |
 | 9 | Setup auth | Integrasi Clerk, buat mapping `users` ↔ `auth_identities` sesuai data model, middleware role-based (`LEARNER`/`ADMIN`) untuk route group learner/admin. | Middleware auth jalan di 3 shell (public/learner/admin) | Pending |

@@ -4,7 +4,7 @@
 
 ## Status repo
 
-**Repo ini saat ini berisi dokumen perencanaan produk (PRD, data model, dan desain frontend), belum berisi kode aplikasi.** Tidak ditemukan `package.json`, folder `app/`/`src/`, migration file, atau scaffold project apa pun — hanya dokumen Markdown di root dan `docs/`. Bagian "Instalasi" dan "Menjalankan Project" di bawah karena itu belum berlaku; keduanya diisi dengan stack yang **direncanakan** berdasarkan PRD, bukan yang sudah bisa dijalankan.
+Scaffold aplikasi sudah ada di `apps/web` (monorepo pnpm + Turborepo, Next.js 16 App Router, TypeScript strict, Tailwind CSS + shadcn/ui), dengan struktur route group `(public)`/`(learner)`/`(admin)` dan tiga API route handler sesuai `docs/FRONTEND-DESIGN.md` §3 — semua masih halaman placeholder, belum ada UI/fitur nyata. **Belum ada** koneksi database (Drizzle/PostgreSQL), auth (Clerk), maupun payment (Midtrans) — langkah tersebut menyusul, lihat `docs/PROJECT-PLAYBOOK.md` untuk urutan lengkapnya.
 
 ## Tentang DirakitPro
 
@@ -62,10 +62,19 @@ Sesuai §14 PRD ("Technical Architecture & Stack") — arsitektur *Next.js full-
 ├── DirakitPro_MVP_PRD_Text_First_V1.4.md      # PRD (Bahasa Indonesia)
 ├── DirakitPro_MVP_PRD_Text_First_V1.4_EN.md   # PRD (English, acuan teknis §8–§18)
 ├── docs/
-│   ├── DATA-MODEL.md       # Draft skema database (Drizzle ORM/PostgreSQL) — belum ada migration file
-│   ├── FRONTEND-DESIGN.md  # Kontrak desain UI/UX (route map, IA, prinsip visual) untuk Fase 0–3
-│   ├── IMPECCABLE.md       # Ringkasan tool desain "Impeccable" yang dipakai agent AI di project ini
-│   └── TASTE-SKILL.md      # Ringkasan ruleset "Taste Skill" untuk menghindari output desain generik AI
+│   ├── DATA-MODEL.md         # Draft skema database (Drizzle ORM/PostgreSQL) — belum ada migration file
+│   ├── FRONTEND-DESIGN.md    # Kontrak desain UI/UX (route map, IA, prinsip visual) untuk Fase 0–3
+│   ├── PROJECT-PLAYBOOK.md   # Checklist langkah bootstrap project dari nol + status tiap langkah
+│   ├── IMPECCABLE.md         # Ringkasan tool desain "Impeccable" yang dipakai agent AI di project ini
+│   └── TASTE-SKILL.md        # Ringkasan ruleset "Taste Skill" untuk menghindari output desain generik AI
+├── apps/
+│   └── web/                  # Aplikasi Next.js 16 (App Router, TS strict, Tailwind, shadcn/ui)
+│       └── app/
+│           ├── (public)/     # Shell publik: home, courses, login/register, checkout, payment
+│           ├── (learner)/    # Shell learner: dashboard, learn/[courseSlug]/[lessonSlug], account
+│           ├── (admin)/      # Shell admin: courses, users, orders, projects, feedback
+│           └── api/          # Route handler: webhooks Clerk/Midtrans, media upload (masih stub 501)
+├── pnpm-workspace.yaml, turbo.json, package.json  # Konfigurasi monorepo pnpm + Turborepo
 ├── .agents/skills/design-taste-frontend/  # Skill agent terkait taste/desain frontend
 ├── .claude/, .codex/       # Konfigurasi harness AI coding agent (Claude Code, Codex)
 └── skills-lock.json
@@ -78,7 +87,17 @@ Sesuai §14 PRD ("Technical Architecture & Stack") — arsitektur *Next.js full-
 
 ## Instalasi & menjalankan project
 
-Belum berlaku — repo ini belum memiliki scaffold aplikasi (tidak ada `package.json`, folder `app/`, atau migration database). Langkah setup akan mengikuti stack di atas (pnpm + Turborepo, Next.js 16, Drizzle migration ke PostgreSQL, environment variable untuk Clerk/Midtrans/Cloudflare R2/Resend/PostHog/Sentry) begitu scaffold project dibuat. Bagian ini perlu diperbarui saat kode aplikasi mulai ditambahkan.
+Prasyarat: Node.js 22+ dan pnpm (`corepack enable` lalu pnpm mengikuti versi di `package.json`).
+
+```bash
+pnpm install        # install semua dependency workspace (root + apps/web)
+pnpm dev            # jalankan Next.js dev server (apps/web) via Turborepo
+pnpm build          # production build
+pnpm lint           # ESLint
+pnpm typecheck      # tsc --noEmit (TypeScript strict)
+```
+
+Belum ada environment variable yang wajib diisi karena integrasi Clerk/Midtrans/database/dst belum disambungkan ke kode (masih tahap route placeholder). `.env.example` akan ditambahkan begitu integrasi tersebut mulai dikerjakan.
 
 ## Catatan lain
 
