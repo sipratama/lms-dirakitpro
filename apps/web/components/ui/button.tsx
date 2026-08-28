@@ -1,3 +1,4 @@
+import { isValidElement } from "react";
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -44,11 +45,22 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton,
+  render,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // `render` di sini hampir selalu dipakai untuk link navigasi (mis. `<Link>`,
+  // yang jadi `<a>`), bukan `<button>` asli -- Base UI perlu tahu itu lewat
+  // `nativeButton={false}` supaya semantik/keyboard handling-nya benar untuk
+  // host element non-button (lihat peringatan Base UI kalau ini salah).
+  const isRenderingNativeButton =
+    !render || (isValidElement(render) && render.type === "button");
+
   return (
     <ButtonPrimitive
       data-slot="button"
+      nativeButton={nativeButton ?? isRenderingNativeButton}
+      render={render}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
