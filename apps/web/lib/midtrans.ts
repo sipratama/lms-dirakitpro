@@ -63,6 +63,10 @@ export function verifyMidtransSignature({
   grossAmount,
   signatureKey,
 }: VerifyMidtransSignatureParams): boolean {
+  for (const field of [orderId, statusCode, grossAmount, signatureKey]) {
+    if (typeof field !== "string" || field.length === 0) return false;
+  }
+
   const serverKey = process.env.MIDTRANS_SERVER_KEY ?? "";
   const expected = createHash("sha512")
     .update(orderId + statusCode + grossAmount + serverKey)

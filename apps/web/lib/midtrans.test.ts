@@ -133,4 +133,39 @@ describe("verifyMidtransSignature", () => {
       }),
     ).toBe(false);
   });
+
+  it("returns false without throwing when signatureKey is missing", () => {
+    expect(
+      verifyMidtransSignature({
+        orderId,
+        statusCode,
+        grossAmount,
+        signatureKey: undefined as unknown as string,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false without throwing when orderId is missing", () => {
+    const signatureKey = computeSignature();
+    expect(
+      verifyMidtransSignature({
+        orderId: undefined as unknown as string,
+        statusCode,
+        grossAmount,
+        signatureKey,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false without throwing when a field is an empty string", () => {
+    const signatureKey = computeSignature();
+    expect(
+      verifyMidtransSignature({
+        orderId: "",
+        statusCode,
+        grossAmount,
+        signatureKey,
+      }),
+    ).toBe(false);
+  });
 });
