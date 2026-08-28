@@ -21,9 +21,13 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
   --color-border-strong: var(--border-strong);
-  --font-sans: var(--font-geist-sans);
+  /* Outfit dipasang di app/layout.tsx sebagai `--font-outfit` (§8.3). Nama
+   * variabel sumber SENGAJA berbeda dari `--font-sans` — pernah ada bug
+   * `--font-sans: var(--font-sans)` yang self-referential dan bikin font
+   * jatuh ke fallback diam-diam. Jangan samakan namanya. */
+  --font-sans: var(--font-outfit);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-heading: var(--font-outfit);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -73,43 +77,56 @@
  * ditambah nanti via `shadcn add`, ganti kelas hover-nya ke
  * `bg-accent-muted` (bukan `bg-accent`), supaya hover state tidak jadi
  * warna aksen brand penuh di semua tempat.
+ *
+ * Catatan kontras: di atas `--accent-muted` (#90CAF9) pakai `text-foreground`,
+ * JANGAN `text-foreground-muted` — yang kedua cuma 4.33:1 dan borderline
+ * gagal AA untuk teks kecil. `text-foreground` di atasnya 10.20:1.
  */
 :root {
-  /* Surface */
-  --background: oklch(0.98 0.004 75);
-  --surface: oklch(0.965 0.006 75);
-  --surface-raised: oklch(0.995 0.003 75);
+  /* Surface — tangga elevasi monoton: makin terangkat, makin mendekati putih.
+   * #E3F2FD (ground) -> #F4F9FE (card) -> #FFFFFF (dialog/popover). */
+  --background: oklch(0.953 0.022 239.4); /* #E3F2FD */
+  --surface: oklch(0.98 0.009 247.9); /* #F4F9FE */
+  --surface-raised: oklch(1 0 0); /* #FFFFFF */
 
   /* Foreground */
-  --foreground: oklch(0.18 0.012 75);
-  --foreground-muted: oklch(0.42 0.01 75);
-  --foreground-subtle: oklch(0.6 0.008 75);
+  --foreground: oklch(0.208 0.04 265.8); /* #0F172A */
+  --foreground-muted: oklch(0.446 0.037 257.3); /* #475569 */
+  --foreground-subtle: oklch(0.554 0.041 257.4); /* #64748B */
 
-  /* Accent — oksida jingga hangat (§8.1), satu-satunya warna aksen brand */
-  --accent: oklch(0.62 0.16 45);
-  --accent-foreground: oklch(0.99 0.005 75);
-  --accent-muted: oklch(0.94 0.03 45);
+  /* Accent — biru DirakitPro (§8.1), satu-satunya warna aksen brand.
+   * `--accent-foreground` SENGAJA gelap, bukan putih: putih di atas #2196F3
+   * cuma 3.12:1 dan gagal baseline AA §6 poin 3. #0F172A memberi 5.71:1
+   * (lihat Keputusan #10 §14 — jangan diubah jadi putih tanpa mengganti
+   * nilai `--accent` juga). */
+  --accent: oklch(0.658 0.169 248.8); /* #2196F3 */
+  --accent-foreground: oklch(0.208 0.04 265.8); /* #0F172A */
+  --accent-muted: oklch(0.816 0.09 243.6); /* #90CAF9 */
 
-  /* Semantic status */
-  --success: oklch(0.6 0.14 145);
-  --success-foreground: oklch(0.99 0.005 145);
-  --warning: oklch(0.75 0.15 85);
-  --warning-foreground: oklch(0.2 0.02 85);
-  --danger: oklch(0.55 0.22 25);
-  --danger-foreground: oklch(0.99 0.005 25);
-  --info: oklch(0.55 0.12 240);
-  --info-foreground: oklch(0.99 0.005 240);
+  /* Semantic status — semua gelap + foreground putih, supaya satu pola:
+   * lolos AA baik sebagai teks di atas surface terang maupun sebagai fill. */
+  --success: oklch(0.448 0.108 151.3);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.473 0.125 46.2);
+  --warning-foreground: oklch(1 0 0);
+  --danger: oklch(0.505 0.19 27.5);
+  --danger-foreground: oklch(1 0 0);
+  --info: oklch(0.513 0.16 255.7);
+  --info-foreground: oklch(1 0 0);
 
-  /* Border & structure */
-  --border: oklch(0.89 0.006 75);
-  --border-strong: oklch(0.78 0.01 75);
+  /* Border & structure — `--border` = rgba(15,23,42,0.08) dari brief. */
+  --border: oklch(0.208 0.04 265.8 / 0.08);
+  --border-strong: oklch(0.208 0.04 265.8 / 0.18);
 
-  /* Interactive states — ring didedikasikan sendiri, bukan reuse --accent (§8.2) */
-  --ring: oklch(0.32 0.02 75);
+  /* Interactive states — ring didedikasikan sendiri, bukan reuse --accent (§8.2).
+   * Aksen biru di atas latar biru muda kontrasnya cuma 2.74:1; ring slate gelap
+   * memberi 12.81:1 di atas `--background`. */
+  --ring: oklch(0.279 0.037 260);
 
-  /* Elevation — 2 tingkat (§8.4), tanpa glassmorphism/neumorphism */
-  --shadow-sm: 0 1px 2px oklch(0.2 0.01 75 / 0.06);
-  --shadow-md: 0 4px 12px oklch(0.2 0.01 75 / 0.1);
+  /* Elevation — 2 tingkat (§8.4), tanpa glassmorphism/neumorphism.
+   * `--shadow-md` adalah shadow dari brief: 0 8px 30px rgba(15,23,42,0.08). */
+  --shadow-sm: 0 1px 2px oklch(0.208 0.04 265.8 / 0.06);
+  --shadow-md: 0 8px 30px oklch(0.208 0.04 265.8 / 0.08);
 
   /* Shape — satu skala radius (§8.4) */
   --radius: 0.5rem;
@@ -137,55 +154,67 @@
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
   --chart-1: var(--accent);
-  --chart-2: oklch(0.55 0.12 240);
-  --chart-3: oklch(0.6 0.14 145);
-  --chart-4: oklch(0.75 0.15 85);
-  --chart-5: oklch(0.6 0.008 75);
+  --chart-2: var(--accent-muted);
+  --chart-3: oklch(0.448 0.108 151.3);
+  --chart-4: oklch(0.666 0.157 58.3);
+  --chart-5: oklch(0.554 0.041 257.4);
 }
 
+/*
+ * Dark mode: brief produk hanya menetapkan nilai light. Turunan di bawah
+ * adalah inversi terkontrol dari sistem yang sama, bukan palet baru
+ * (Keputusan #11 §14). Prinsipnya: hue biru-slate yang sama dipertahankan,
+ * lightness dibalik, chroma dijaga rendah di surface supaya tetap "lembut,
+ * tidak over-saturated" seperti diminta brief. `--foreground` dark memakai
+ * persis #E3F2FD — warna latar light mode — supaya kedua tema terbaca
+ * sebagai satu sistem, bukan dua produk.
+ */
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Surface */
-    --background: oklch(0.16 0.008 75);
-    --surface: oklch(0.2 0.01 75);
-    --surface-raised: oklch(0.24 0.012 75);
+    /* Surface — tangga elevasi naik menjauhi hitam, tetap bernuansa navy */
+    --background: oklch(0.198 0.037 264.2); /* #0D1526 */
+    --surface: oklch(0.226 0.039 259.9); /* #111C2E */
+    --surface-raised: oklch(0.261 0.045 261.9); /* #18243A */
 
     /* Foreground */
-    --foreground: oklch(0.96 0.004 75);
-    --foreground-muted: oklch(0.72 0.01 75);
-    --foreground-subtle: oklch(0.52 0.01 75);
+    --foreground: oklch(0.953 0.022 239.4); /* #E3F2FD */
+    --foreground-muted: oklch(0.711 0.035 256.8); /* #94A3B8 */
+    --foreground-subtle: oklch(0.554 0.041 257.4); /* #64748B */
 
-    /* Accent */
-    --accent: oklch(0.68 0.16 45);
-    --accent-foreground: oklch(0.14 0.01 45);
-    --accent-muted: oklch(0.28 0.05 45);
+    /* Accent — dinaikkan ke Blue 400 supaya tetap hidup di atas latar gelap;
+     * masih biru #2196F3 yang sama secara hue, cuma lebih terang. Foreground
+     * gelap (6.88:1), pola yang sama dengan light mode. */
+    --accent: oklch(0.7 0.149 246.7); /* #42A5F5 */
+    --accent-foreground: oklch(0.198 0.037 264.2); /* #0D1526 */
+    --accent-muted: oklch(0.3 0.06 248);
 
-    /* Semantic status */
-    --success: oklch(0.68 0.14 145);
-    --success-foreground: oklch(0.12 0.02 145);
-    --warning: oklch(0.78 0.14 85);
-    --warning-foreground: oklch(0.16 0.02 85);
-    --danger: oklch(0.62 0.2 25);
-    --danger-foreground: oklch(0.98 0.01 25);
-    --info: oklch(0.65 0.12 240);
-    --info-foreground: oklch(0.12 0.02 240);
+    /* Semantic status — dibalik: terang + foreground gelap */
+    --success: oklch(0.8 0.182 151.7);
+    --success-foreground: oklch(0.198 0.037 264.2);
+    --warning: oklch(0.837 0.164 84.4);
+    --warning-foreground: oklch(0.198 0.037 264.2);
+    --danger: oklch(0.711 0.166 22.2);
+    --danger-foreground: oklch(0.198 0.037 264.2);
+    --info: oklch(0.748 0.124 244.7);
+    --info-foreground: oklch(0.198 0.037 264.2);
 
-    /* Border & structure */
-    --border: oklch(1 0 0 / 10%);
-    --border-strong: oklch(1 0 0 / 18%);
+    /* Border & structure — alpha dari `--foreground`, bukan putih murni,
+     * supaya hairline ikut bernuansa biru seperti di light mode */
+    --border: oklch(0.953 0.022 239.4 / 0.12);
+    --border-strong: oklch(0.953 0.022 239.4 / 0.22);
 
     /* Interactive states */
-    --ring: oklch(0.85 0.02 75);
+    --ring: oklch(0.869 0.02 252.9); /* #CBD5E1 */
 
     /* Elevation */
-    --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
-    --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
+    --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.35);
+    --shadow-md: 0 8px 30px oklch(0 0 0 / 0.5);
 
     --chart-1: var(--accent);
-    --chart-2: oklch(0.65 0.12 240);
-    --chart-3: oklch(0.68 0.14 145);
-    --chart-4: oklch(0.78 0.14 85);
-    --chart-5: oklch(0.72 0.01 75);
+    --chart-2: oklch(0.816 0.09 243.6);
+    --chart-3: oklch(0.8 0.182 151.7);
+    --chart-4: oklch(0.837 0.164 84.4);
+    --chart-5: oklch(0.711 0.035 256.8);
   }
 }
 
@@ -198,5 +227,57 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Homepage-only visual utilities (brief "Softly"-inspired redesign, lihat
+ * Keputusan #9 §14 FRONTEND-DESIGN.md untuk batasan blob & eyebrow).
+ * Ditaruh sebagai utility di sini (bukan inline style per komponen) supaya
+ * satu definisi dipakai ulang oleh hero + final CTA, tapi TIDAK berefek ke
+ * halaman lain karena class-nya cuma dipakai di komponen homepage.
+ */
+@layer utilities {
+  /* Blob latar blur bernuansa --accent-muted -- CSS keyframes murni, tanpa
+   * JS, gerakan pelan (±8-12px) sesuai batas Keputusan #9. */
+  @keyframes float-blob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float-blob {
+    animation: float-blob 7s ease-in-out infinite;
+  }
+
+  .animate-float-blob-slow {
+    animation: float-blob 8s ease-in-out infinite;
+  }
+
+  .animate-float-blob-delay {
+    animation-delay: 1.5s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float-blob,
+    .animate-float-blob-slow {
+      animation: none;
+    }
+  }
+
+  /* Grain/noise overlay -- tile SVG feTurbulence kecil (~1-2KB) sebagai
+   * data-URI, TANPA asset eksternal/canvas/JS (§2.1 batas bandwidth mobile).
+   * Dipasang HANYA lewat komponen `GrainOverlay` di
+   * `app/(public)/layout.tsx` -- sengaja tidak ditempel ke `body`/root
+   * layout supaya workspace lesson & admin (§2.1 constraint lebih ketat)
+   * tidak ikut menanggung overlay ini. */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 120px 120px;
   }
 }

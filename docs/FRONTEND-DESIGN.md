@@ -27,11 +27,11 @@ DirakitPro bukan platform hiburan belajar (gamified, playful, banyak badge) dan 
 
 Ban list berikut **wajib**, bukan saran:
 
-- Gradient ungu/mesh khas AI, glow dekoratif berlebihan.
+- Gradient ungu/mesh khas AI, glow dekoratif berlebihan. — *Pengecualian tercatat: blob warna blur bernuansa `--accent-muted` diizinkan terbatas, lihat Keputusan #9 §14. Larangan ini tetap penuh untuk gradient ungu, mesh multi-hue, dan glow di sekitar teks/tombol.*
 - Baris fitur "tiga kartu sama besar" tanpa hierarki.
 - Card generik untuk segala hal (lesson, milestone, testimoni — semua dibungkus card seragam).
 - Em-dash/en-dash pada copy Bahasa Indonesia.
-- Section-numbering eyebrow ("01 — Kenapa DirakitPro") di atas heading.
+- Section-numbering eyebrow ("01 — Kenapa DirakitPro") di atas heading. — *Yang dilarang adalah **penomorannya**, bukan eyebrow-nya. Eyebrow polos tanpa nomor diizinkan, lihat Keputusan #9 §14.*
 - Label versi/status dekoratif ("BETA", pill mengambang di atas gambar).
 - Ilustrasi SVG hero buatan tangan generik.
 - `window.addEventListener('scroll')` manual — animasi memakai pola skeleton baku (§9).
@@ -342,69 +342,64 @@ Prioritas admin adalah kejelasan fungsi (tabel data, form panjang) — bukan est
 
 ### 8.1 Arah visual
 
-- **Latar off-white/off-black** — bukan `#FFFFFF`/`#000000` murni (wajib, sesuai Taste Skill §8 Dark Mode Protocol).
-- **Satu warna aksen** dipakai konsisten di seluruh produk (Color Consistency Lock, Taste Skill §4) — direkomendasikan **oksida jingga hangat**, selaras nuansa "merakit/workshop" tanpa jatuh ke ungu generik AI.
+- **Latar bernuansa, bukan `#FFFFFF`/`#000000` murni** (wajib, sesuai Taste Skill §8 Dark Mode Protocol). Aturan ini berlaku untuk *ground* halaman (`--background`): light mode `#E3F2FD`, dark mode `#0D1526`. Putih murni tetap boleh dipakai untuk satu peran spesifik, yaitu lapisan paling terangkat (`--surface-raised`: dialog/dropdown/popover), karena di sana putih berfungsi sebagai kontras elevasi terhadap ground biru, bukan sebagai warna halaman.
+- **Satu warna aksen** dipakai konsisten di seluruh produk (Color Consistency Lock, Taste Skill §4) — **biru DirakitPro `#2196F3`**. Mood yang dituju: tenang, modern, optimistis, ramah pemula, sedikit premium — "bengkel digital yang lembut", bukan aplikasi wellness/meditasi. Secara eksplisit **bukan** pink/coral/peach/merah sebagai warna dominan, dan bukan ungu-mesh generik AI.
 - **Satu sistem radius** (Shape Consistency Lock) — radius kecil–menengah konsisten (kartu, tombol, input berbagi skala radius yang sama, tidak dicampur pill button dengan card siku tajam).
 - **Tipografi teknis, sangat terbaca** — satu typeface UI (sans, humanist/grotesk netral) + satu typeface monospace untuk code block. Bukan display font dekoratif di heading.
 - **Elevation minimal** — shadow halus untuk membedakan lapisan (dialog, dropdown), bukan efek glassmorphism/neumorphism.
 
 ### 8.2 Token semantik (CSS custom properties, light-first)
 
-Definisi lengkap di `app/globals.css` saat scaffold; berikut kontrak nama dan peran token, bukan nilai hex final (nilai dipilih saat implementasi tokens, disetujui lewat Impeccable `init`/`shape`):
+Implementasi otoritatif ada di `apps/web/app/globals.css`. Nama token adalah kontrak — komponen bergantung padanya, jadi **nama tidak boleh berubah tanpa merevisi dokumen ini dulu**; nilai boleh berubah saat rebrand.
 
-```css
-:root {
-  /* Surface */
-  --background: /* off-white */;
-  --surface: /* sedikit lebih terang/gelap dari background, untuk card/panel */;
-  --surface-raised: /* dialog, dropdown, popover */;
+Sistem warna aktif adalah **biru DirakitPro** (keputusan product owner, produk-wide — lihat Keputusan #8 §14). Nilai ditulis `oklch()` di CSS agar `color-mix(in oklch, …)` yang dipakai primitive shadcn berperilaku benar; hex di tabel adalah sumber brief.
 
-  /* Foreground */
-  --foreground: /* off-black, teks utama */;
-  --foreground-muted: /* teks sekunder, caption, hint */;
-  --foreground-subtle: /* placeholder, disabled text */;
+#### Peta peran warna (light)
 
-  /* Accent */
-  --accent: /* satu warna aksen brand */;
-  --accent-foreground: /* teks/ikon di atas accent */;
-  --accent-muted: /* background lembut untuk highlight ringan */;
+| Token | Hex sumber | Peran |
+|---|---|---|
+| `--background` | `#E3F2FD` | Ground halaman, nada dominan di seluruh produk |
+| `--surface` | `#F4F9FE` | Card/panel — satu anak tangga di atas ground, mendekati putih |
+| `--surface-raised` | `#FFFFFF` | Dialog, dropdown, popover — lapisan paling terangkat |
+| `--foreground` | `#0F172A` | Teks utama |
+| `--foreground-muted` | `#475569` | Teks sekunder, caption, hint |
+| `--foreground-subtle` | `#64748B` | Placeholder, disabled text (turunan; brief hanya memberi dua tingkat) |
+| `--accent` | `#2196F3` | CTA primer, progress, active state, aksen fokal kecil |
+| `--accent-foreground` | `#0F172A` | Teks/ikon di atas `--accent` (**gelap, bukan putih** — lihat Keputusan #10 §14) |
+| `--accent-muted` | `#90CAF9` | Surface sekunder lembut: pill, badge, highlight, hover fill, blob latar |
+| `--border` | `rgba(15,23,42,0.08)` | Hairline default |
+| `--border-strong` | `rgba(15,23,42,0.18)` | Border yang perlu lebih terlihat (input, pemisah tabel) |
+| `--ring` | `#1E293B` | Focus ring — slate gelap, **sengaja bukan** `--accent` (biru di atas ground biru cuma 2.74:1) |
+| `--shadow-md` | `0 8px 30px rgba(15,23,42,0.08)` | Shadow brief; dipakai untuk lapisan floating |
+| `--shadow-sm` | `0 1px 2px rgba(15,23,42,0.06)` | Turunan untuk lapisan raised (§8.4 tetap 2 tingkat) |
 
-  /* Semantic status */
-  --success: /* checkpoint lulus, payment sukses */;
-  --success-foreground: ;
-  --warning: /* callout warning, order mendekati expired */;
-  --warning-foreground: ;
-  --danger: /* error, checkpoint gagal, payment gagal */;
-  --danger-foreground: ;
-  --info: /* callout info/tip */;
-  --info-foreground: ;
+**Tiga warna inti brief dipetakan ke tiga peran berbeda, bukan ditumpuk:** `#E3F2FD` jadi ground, `#90CAF9` jadi surface sekunder/highlight (`--accent-muted`), `#2196F3` jadi aksen tunggal. Brief menyebut `#90CAF9` untuk "cards" — di level produk itu diterjemahkan jadi `--accent-muted` (pill/highlight/blob), **bukan** `--surface`, karena card sebagai wadah teks panjang (lesson reader, tabel admin) butuh field netral; `#90CAF9` sebagai background semua card akan melanggar "tetap lembut, tidak over-saturated" dari brief yang sama.
 
-  /* Border & structure */
-  --border: /* border default, tipis */;
-  --border-strong: /* border yang butuh sedikit lebih terlihat, mis. input focus-adjacent */;
+#### Status semantik
 
-  /* Interactive states */
-  --ring: /* focus ring — kontras tinggi, bukan warna accent yang bisa low-contrast */;
+`--success` / `--warning` / `--danger` / `--info` semuanya bernilai **gelap dengan foreground putih**, satu pola konsisten, supaya lolos AA baik dipakai sebagai teks di atas surface terang maupun sebagai fill. `--info` memakai biru yang lebih dalam (`#1565C0`) daripada `--accent` — sekeluarga hue, tapi jelas bukan CTA. Merah tetap dipakai untuk `--danger` karena itu peran fungsional, bukan "dominansi visual merah" yang dilarang brief.
 
-  /* Elevation */
-  --shadow-sm: ;
-  --shadow-md: ;
-}
+#### Dark mode
 
-[data-theme="dark"] {
-  /* redefinisi seluruh token di atas untuk mode gelap — off-black background, off-white foreground */
-}
-```
+Brief hanya menetapkan nilai light. Dark mode adalah **inversi terkontrol dari sistem yang sama**, bukan palet kedua (Keputusan #11 §14): hue biru-slate dipertahankan, lightness dibalik, chroma surface dijaga rendah. `--foreground` dark memakai persis `#E3F2FD` (warna ground light mode) supaya kedua tema terbaca sebagai satu sistem. `--accent` naik ke `#42A5F5` agar tetap hidup di atas latar gelap sambil tetap dikenali sebagai biru yang sama. Mekanismenya `@media (prefers-color-scheme: dark)`, **bukan** `[data-theme="dark"]` maupun class `.dark` — lihat Keputusan #1 §14.
 
-**Aturan penamaan:** komponen **tidak pernah** memakai nilai warna literal (`bg-orange-600`) langsung di JSX untuk elemen brand/semantic. Selalu lewat token semantik (`bg-accent`, `text-danger`). Ini mencegah drift warna saat rebrand dan memenuhi Color Consistency Lock.
+#### Aturan pakai
+
+- Komponen **tidak pernah** memakai nilai warna literal (`bg-blue-500`) langsung di JSX untuk elemen brand/semantic. Selalu lewat token semantik (`bg-accent`, `text-danger`). Ini mencegah drift warna saat rebrand dan memenuhi Color Consistency Lock.
+- Di atas `--accent-muted`, pakai `text-foreground` — **jangan** `text-foreground-muted` (4.33:1, borderline gagal AA untuk teks kecil).
+- Variable internal shadcn (`--primary`, `--card`, `--popover`, `--muted`, `--destructive`, `--sidebar-*`, `--chart-*`) **dipetakan** ke token di atas di `globals.css`, tidak didefinisikan sendiri — satu sumber kebenaran.
 
 ### 8.3 Tipografi
 
 | Peran | Font | Ukuran dasar |
 |---|---|---|
-| UI & body | Sans humanist/grotesk (mis. keluarga Inter-like) | 16px dasar, type scale modular (1.125–1.25 ratio) |
-| Code/monospace | Monospace dengan ligature opsional off (mis. keluarga JetBrains Mono-like) | Match line-height dengan body untuk keselarasan visual di lesson |
-| Heading | Sama dengan UI sans, dibedakan lewat weight & size, **bukan** typeface terpisah | — |
+| UI & body | **Outfit** (geometric sans, variable) | 16px dasar, type scale modular (1.125–1.25 ratio) |
+| Code/monospace | **Geist Mono**, ligature off | Match line-height dengan body untuk keselarasan visual di lesson |
+| Heading/display | Sama dengan UI sans (Outfit), dibedakan lewat weight, size, dan tracking — **bukan** typeface terpisah | Display hero 48–96px (clamp responsif), tracking rapat (`tracking-tight`/`-0.02em`) |
+
+- **Loading**: Outfit di-load lewat `next/font/google` di `app/layout.tsx` sebagai variable font, subset `latin` saja, diekspos sebagai `--font-outfit` lalu dipetakan `--font-sans: var(--font-outfit)` di `globals.css`. Satu file variable menutup seluruh rentang weight, lebih hemat daripada 3–4 file statis — konsisten batasan bandwidth §2.1 dan Implementation Contract §15 poin 6. **Jangan** menamai variabel sumbernya `--font-sans`: itu menghasilkan `--font-sans: var(--font-sans)` yang sirkular dan membuat font diam-diam jatuh ke fallback (regresi yang pernah terjadi di repo ini).
+- **Case**: sentence case di seluruh UI dan heading. Tanpa ALL-CAPS dekoratif kecuali label sistem sangat kecil (mis. badge status) bila memang perlu.
+- **Kontras lembut**: body memakai `--foreground-muted` untuk teks pendukung, bukan menurunkan opacity `--foreground`.
 
 Content lesson (`markdown` block) memakai **content width 65–72ch** (§frontend brief awal, konsisten prinsip keterbacaan editorial) — diberlakukan lewat `max-width` pada content pane, bukan pada seluruh halaman.
 
@@ -528,6 +523,10 @@ Setiap halaman yang mengambil data wajib punya rancangan untuk state berikut seb
 | 5 | **Tidak ada animasi masuk per paragraf di lesson reader.** | Mengganggu keterbacaan materi panjang; bertentangan dengan prinsip "text-first" dan aksesibilitas motion. |
 | 6 | **Admin shell boleh terasa lebih utilitarian** (kepadatan tabel lebih tinggi, dekorasi lebih minim) dibanding shell publik/learner, tapi **tetap satu sistem token**. | Prioritas admin adalah efisiensi kerja founder mengelola konten (§4.3.6 PRD "easy to update"), bukan showcase visual. |
 | 7 | **Content width lesson dikunci 65–72ch**, tidak mengikuti lebar penuh container di desktop besar. | Keterbacaan teks panjang; standar tipografi editorial, konsisten dengan positioning "text-first". |
+| 8 | **Sistem warna & tipografi produk diganti total ke biru DirakitPro + Outfit**, menggantikan oksida jingga + Geist Sans. Berlaku **produk-wide** (public/learner/admin), bukan hanya homepage. | Keputusan eksplisit product owner (2026-08-28), diambil setelah ditanya apakah perubahan ini homepage-only atau produk-wide; jawabannya "ganti total token produk". Diterapkan sebagai perubahan **nilai** token, bukan perubahan nama token, sehingga Keputusan #2 (aksen tunggal) dan seluruh komponen yang sudah ada tetap berlaku tanpa perubahan API. Mood target: tenang, modern, optimistis, ramah pemula, sedikit premium — "bengkel digital yang lembut". |
+| 9 | **Dua item ban list §1.3 dilonggarkan secara terbatas dan sadar** untuk arah visual baru: (a) **blob warna blur** sebagai elemen latar diizinkan, terbatas pada nuansa `--accent-muted`/`--accent` dengan opacity rendah, satu sistem hue biru; (b) **eyebrow polos tanpa nomor** di atas heading hero diizinkan. | Keduanya bukan pelanggaran ban list yang sebenarnya, melainkan pembacaan yang lebih tepat atas ban list itu: larangan §1.3 baris 1 menyasar *gradient ungu/mesh multi-hue khas AI dan glow dekoratif*, bukan semua bidang warna blur; larangan baris 5 menyasar *penomoran section* ("01 — "), bukan eyebrow sebagai pola. Kedua elemen diminta eksplisit oleh product owner sebagai keputusan produk, bukan muncul sebagai kebiasaan default generator. **Batas yang tetap berlaku:** tidak ada gradient ungu, tidak ada mesh multi-hue, tidak ada glow di sekitar teks/tombol, tidak ada penomoran section, blob tidak boleh menurunkan kontras teks di atasnya di bawah ambang §6 poin 3. |
+| 10 | **`--accent-foreground` adalah slate gelap `#0F172A`, bukan putih**, meski konvensi umum menaruh teks putih di atas tombol biru. | Putih di atas `#2196F3` hanya 3.12:1 — gagal baseline AA §6 poin 3 (≥4.5:1) tepat di elemen paling penting produk (setiap CTA primer). `#0F172A` di atas `#2196F3` memberi 5.71:1. Ini juga mengikuti spesifikasi Material sendiri untuk Blue 500. Alternatif yang ditolak: menggelapkan `--accent` ke `#1565C0` agar putih lolos (5.75:1) — ditolak karena `#2196F3` adalah hex yang ditetapkan eksplisit oleh product owner. Kalau tim lebih memilih CTA teks putih, yang harus diubah adalah nilai `--accent`, **bukan** menaikkan `--accent-foreground` ke putih di atas `#2196F3`. |
+| 11 | **Dark mode diturunkan sendiri sebagai inversi terkontrol** dari sistem light, karena brief produk tidak menetapkan nilai dark. | Token dark adalah dependensi fondasi yang diblokir banyak pekerjaan lain; menunggu spesifikasi lebih mahal daripada memilih default yang wajar dan bisa direvisi. Aturannya: hue biru-slate yang sama dipertahankan, lightness dibalik, chroma surface dijaga rendah, `--foreground` dark = `#E3F2FD` (ground light mode) supaya kedua tema jelas satu sistem. Semua pasangan diverifikasi ≥4.5:1 untuk teks. Murah dibalik (hanya nilai di satu blok `@media`). |
 
 ---
 

@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Outfit = typeface UI/heading (§8.3 FRONTEND-DESIGN.md). Variable font, jadi
+// satu file woff2 sudah menutup seluruh rentang weight (400 body s/d 700
+// display) — lebih hemat daripada memuat 3-4 file statis, sesuai batasan
+// bandwidth mobile Indonesia (§2.1). Subset dikunci ke `latin` saja.
+//
+// Nama variabel CSS-nya `--font-outfit`, BUKAN `--font-sans`: globals.css
+// memetakan `--font-sans: var(--font-outfit)`, dan menyamakan nama akan
+// menghasilkan referensi melingkar `--font-sans: var(--font-sans)` yang bikin
+// font diam-diam jatuh ke fallback (bug yang pernah terjadi di repo ini).
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
 });
 
@@ -23,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <ClerkProvider>
       <html
         lang="en"
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        className={`${outfit.variable} ${geistMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">{children}</body>
       </html>
