@@ -1,24 +1,28 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist_Mono, Outfit } from "next/font/google";
+import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-// Outfit = typeface UI/heading (§8.3 FRONTEND-DESIGN.md). Variable font, jadi
-// satu file woff2 sudah menutup seluruh rentang weight (400 body s/d 700
-// display) — lebih hemat daripada memuat 3-4 file statis, sesuai batasan
-// bandwidth mobile Indonesia (§2.1). Subset dikunci ke `latin` saja.
+// Plus Jakarta Sans = typeface UI/heading (§8.3 FRONTEND-DESIGN.md,
+// swap dari Outfit -- keputusan product owner, remediasi hero 2026-08-28).
+// Variable font, jadi satu file woff2 sudah menutup seluruh rentang weight
+// (400 body s/d 800 display) -- lebih hemat daripada memuat 3-4 file statis,
+// sesuai batasan bandwidth mobile Indonesia (§2.1). Subset dikunci ke
+// `latin` saja.
 //
-// Nama variabel CSS-nya `--font-outfit`, BUKAN `--font-sans`: globals.css
-// memetakan `--font-sans: var(--font-outfit)`, dan menyamakan nama akan
+// Nama variabel CSS-nya `--font-jakarta`, BUKAN `--font-sans`: globals.css
+// memetakan `--font-sans: var(--font-jakarta)`, dan menyamakan nama akan
 // menghasilkan referensi melingkar `--font-sans: var(--font-sans)` yang bikin
 // font diam-diam jatuh ke fallback (bug yang pernah terjadi di repo ini).
-const outfit = Outfit({
-  variable: "--font-outfit",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// JetBrains Mono = typeface code/technical label (swap dari Geist Mono,
+// sama alasan). Variable font, subset `latin` saja.
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
@@ -32,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <ClerkProvider>
       <html
         lang="en"
-        className={`${outfit.variable} ${geistMono.variable} h-full antialiased`}
+        className={`${plusJakartaSans.variable} ${jetBrainsMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">{children}</body>
       </html>

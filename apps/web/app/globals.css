@@ -21,13 +21,14 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
   --color-border-strong: var(--border-strong);
-  /* Outfit dipasang di app/layout.tsx sebagai `--font-outfit` (§8.3). Nama
-   * variabel sumber SENGAJA berbeda dari `--font-sans` — pernah ada bug
-   * `--font-sans: var(--font-sans)` yang self-referential dan bikin font
-   * jatuh ke fallback diam-diam. Jangan samakan namanya. */
-  --font-sans: var(--font-outfit);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-outfit);
+  /* Plus Jakarta Sans dipasang di app/layout.tsx sebagai `--font-jakarta`
+   * (§8.3, swap dari Outfit). Nama variabel sumber SENGAJA berbeda dari
+   * `--font-sans` — pernah ada bug `--font-sans: var(--font-sans)` yang
+   * self-referential dan bikin font jatuh ke fallback diam-diam. Jangan
+   * samakan namanya. */
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-heading: var(--font-jakarta);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -279,5 +280,215 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 120px 120px;
+  }
+
+  /*
+   * Hero remediation (laporan tugas 2026-08-29) -- utilitas di bawah ini
+   * HANYA dipakai oleh `Hero`/`HeroWorkspace` (§5, §12-19 brief remediasi).
+   * Semua animasi one-shot dijalankan lewat CSS `animation-delay` murni
+   * (bukan state React) supaya sequencing jalan dari first paint tanpa
+   * bergantung ke hydration; animasi loop (ambient float, cursor, blob)
+   * tetap dijaga amplitudo kecil dan disable total di reduced motion (§6
+   * poin 8).
+   */
+
+  /* Blueprint/grid texture -- garis sangat tipis (alpha 0.04, dalam batas
+   * 0.025-0.06 brief), "dirasakan bukan dilihat sadar". Warna literal rgba
+   * dipakai (bukan token) karena ini alpha-blend murni di atas ground biru,
+   * bukan warna brand/semantic. */
+  .bg-blueprint-grid {
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .bg-blueprint-grid {
+      background-image:
+        linear-gradient(
+          to right,
+          rgba(227, 242, 253, 0.05) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          to bottom,
+          rgba(227, 242, 253, 0.05) 1px,
+          transparent 1px
+        );
+    }
+  }
+
+  /* Ambient float pasca-assembly (§15 brief) -- ditempel di wrapper
+   * ScrollReveal, BUKAN di kartu yang punya kemiringan statis (`rotate-*`
+   * ada di elemen kartu itu sendiri, elemen berbeda), jadi keyframe ini
+   * sengaja HANYA translateY. Kalau rotasi ikut dibakar di sini, `transform`
+   * hasil animasi akan bertumpuk dengan `rotate` native milik kartu anak
+   * (compose, bukan override, di CSS Transforms Level 2) dan membuat
+   * kemiringan kartu berlebihan tiap siklus. `animation-delay` sengaja beda
+   * tiap kartu supaya tidak bergerak sebagai satu blok. */
+  @keyframes hero-float-workspace {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes hero-float-progress {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes hero-float-module {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
+  .animate-hero-float-workspace {
+    animation: hero-float-workspace 8s ease-in-out 1.1s infinite;
+  }
+
+  .animate-hero-float-progress {
+    animation: hero-float-progress 9s ease-in-out 1s infinite;
+  }
+
+  .animate-hero-float-module {
+    animation: hero-float-module 10s ease-in-out 1.3s infinite;
+  }
+
+  /* Kursor kedip di workspace card -- loop kecil, dimatikan total di
+   * reduced motion (bukan cuma dipelankan). */
+  @keyframes hero-cursor-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .animate-hero-cursor {
+    animation: hero-cursor-blink 1s steps(1) infinite;
+  }
+
+  /* Baris kode workspace card muncul satu-satu lalu berhenti (§16 brief) --
+   * one-shot murni via animation-delay, tidak diulang. */
+  @keyframes hero-line-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-hero-line-1,
+  .animate-hero-line-2,
+  .animate-hero-line-3 {
+    opacity: 0;
+    animation-name: hero-line-reveal;
+    animation-duration: 500ms;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+  }
+
+  .animate-hero-line-1 {
+    animation-delay: 1080ms;
+  }
+  .animate-hero-line-2 {
+    animation-delay: 1260ms;
+  }
+  .animate-hero-line-3 {
+    animation-delay: 1440ms;
+  }
+
+  /* Progress bar Progress Rakitan: isi 0 -> 68% sekali saat hero masuk (§17
+   * brief). `scaleX` dipakai (bukan animasi `width`) supaya animasinya
+   * murni transform, tidak memicu layout thrashing. */
+  @keyframes hero-progress-fill {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(0.68);
+    }
+  }
+
+  .animate-hero-progress-fill {
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: hero-progress-fill 900ms cubic-bezier(0.25, 1, 0.5, 1) 950ms 1
+      forwards;
+  }
+
+  /* Titik biru yang berjalan sekali di sepanjang satu connector (§18 brief)
+   * -- `offset-path` disetel inline per elemen (lihat HeroWorkspace), class
+   * ini cuma mengatur progres jarak + opacity supaya generik terhadap path
+   * apa pun. */
+  @keyframes hero-connector-travel {
+    from {
+      offset-distance: 0%;
+      opacity: 0;
+    }
+    8%,
+    85% {
+      opacity: 1;
+    }
+    to {
+      offset-distance: 100%;
+      opacity: 0;
+    }
+  }
+
+  .animate-hero-connector-dot {
+    opacity: 0;
+    animation: hero-connector-travel 900ms cubic-bezier(0.25, 1, 0.5, 1) 1300ms
+      1 forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hero-float-workspace,
+    .animate-hero-float-progress,
+    .animate-hero-float-module,
+    .animate-hero-cursor,
+    .animate-hero-connector-dot {
+      animation: none;
+    }
+
+    .animate-hero-connector-dot {
+      opacity: 0;
+      display: none;
+    }
+
+    .animate-hero-line-1,
+    .animate-hero-line-2,
+    .animate-hero-line-3 {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .animate-hero-progress-fill {
+      animation: none;
+      transform: scaleX(0.68);
+    }
   }
 }

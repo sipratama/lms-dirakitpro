@@ -22,11 +22,12 @@ export function WorkspacePreviewSection() {
       <div className="mx-auto max-w-6xl">
         <ScrollReveal className="max-w-2xl">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Belajar dengan alur yang jelas, bukan tumpukan video
+            Belajar dengan alur yang jelas, bukan hanya tumpukan materi
+            pembelajaran
           </h2>
           <p className="mt-3 text-foreground-muted">
             Materi text-first, contoh kode nyata, dan progres yang selalu
-            kelihatan -- supaya kamu tahu persis sudah sampai mana.
+            kelihatan supaya kamu tahu persis sudah sampai mana.
           </p>
         </ScrollReveal>
 
