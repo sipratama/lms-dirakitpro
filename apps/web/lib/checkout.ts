@@ -112,22 +112,31 @@ export async function createCheckoutOrder(
     .where(eq(users.id, userId))
     .limit(1);
 
-  const { token } = await createSnapTransaction({
-    orderId: newOrder.id,
-    grossAmount: newOrder.totalAmount,
-    customerDetails: {
-      firstName: user?.displayName ?? "",
-      email: user?.email ?? "",
-    },
-  });
+  try {
+    const { token } = await createSnapTransaction({
+      orderId: newOrder.id,
+      grossAmount: newOrder.totalAmount,
+      customerDetails: {
+        firstName: user?.displayName ?? "",
+        email: user?.email ?? "",
+      },
+    });
 
-  await db.insert(payments).values({
-    orderId: newOrder.id,
-    provider: "MIDTRANS",
-    providerOrderId: newOrder.id,
-    status: "PENDING",
-    amount: newOrder.totalAmount,
-  });
+    await db.insert(payments).values({
+      orderId: newOrder.id,
+      provider: "MIDTRANS",
+      providerOrderId: newOrder.id,
+      status: "PENDING",
+      amount: newOrder.totalAmount,
+    });
 
-  return { ok: true, orderId: newOrder.id, snapToken: token };
+    return { ok: true, orderId: newOrder.id, snapToken: token };
+  } catch (error) {
+    // Midtrans call (or the payments insert) failed after the order row was
+    // committed — no payments row exists yet, so it's safe to delete the
+    // orphaned PENDING order rather than leave it occupying the COM-006
+    // pending-order slot with no way to pay for it.
+    await db.delete(orders).where(eq(orders.id, newOrder.id));
+    throw error;
+  }
 }

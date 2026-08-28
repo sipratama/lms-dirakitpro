@@ -18,6 +18,14 @@ out/
 .env.local
 .env.*.local
 
+# playwright (E2E)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+# storageState + konteks user hasil login Clerk — berisi cookie sesi, jangan di-commit
+apps/web/e2e/.auth/
+
 # misc
 .DS_Store
 *.tsbuildinfo
